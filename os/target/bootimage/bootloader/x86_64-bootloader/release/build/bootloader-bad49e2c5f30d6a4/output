@@ -1,0 +1,7 @@
+cargo:rerun-if-changed=/home/alumin112/Desktop/SmolOS/os/Cargo.toml
+cargo:rustc-link-search=native=/home/alumin112/Desktop/SmolOS/os/target/bootimage/bootloader/x86_64-bootloader/release/build/bootloader-bad49e2c5f30d6a4/out
+cargo:rustc-link-lib=static=kernel_bin-os
+cargo:rerun-if-env-changed=KERNEL
+cargo:rerun-if-env-changed=KERNEL_MANIFEST
+cargo:rerun-if-changed=/home/alumin112/Desktop/SmolOS/os/target/x86_64/debug/os
+cargo:rerun-if-changed=build.rs
