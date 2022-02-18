@@ -20,7 +20,11 @@ pub mod vga_buffer;
 extern crate alloc;
 
 #[cfg(test)]
-use bootloader::{entry_point, BootInfo};
+use bootloader::entry_point;
+
+use bootloader::BootInfo;
+use memory::BootInfoFrameAllocator;
+use x86_64::VirtAddr;
 
 #[cfg(test)]
 entry_point!(test_kernel_main);
@@ -32,8 +36,8 @@ fn alloc_error_handler(layout: alloc::alloc::Layout) -> ! {
 
 /// Entry point for `cargo test`
 #[cfg(test)]
-fn test_kernel_main(_boot_info: &'static BootInfo) -> ! {
-    init();
+fn test_kernel_main(boot_info: &'static BootInfo) -> ! {
+    init(boot_info);
     test_main();
     hlt_loop();
 }
@@ -53,11 +57,15 @@ where
     }
 }
 
-pub fn init() {
+pub fn init(boot_info: &'static BootInfo) {
     gdt::init();
     interrupts::init_idt();
     unsafe { interrupts::PICS.lock().initialize() };
     x86_64::instructions::interrupts::enable();
+    let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
+    let mut mapper = unsafe { memory::init(phys_mem_offset) };
+    let mut frame_allocator = unsafe { BootInfoFrameAllocator::init(&boot_info.memory_map) };
+    allocator::init_heap(&mut mapper, &mut frame_allocator).expect("heap initialization failed");
 }
 
 pub fn hlt_loop() -> ! {
