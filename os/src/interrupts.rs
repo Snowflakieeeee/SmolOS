@@ -55,7 +55,7 @@ fn test_breakpoint_exception() {
 #[repr(u8)]
 pub enum InterruptIndex {
     Timer = PIC_1_OFFSET,
-    Keyboard, // new
+    Keyboard,
 }
 
 impl InterruptIndex {
@@ -95,7 +95,7 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStac
 
     let mut port = Port::new(0x60);
     let scancode: u8 = unsafe { port.read() };
-    crate::task::keyboard::add_scancode(scancode); // new
+    crate::task::keyboard::add_scancode(scancode);
 
     unsafe {
         PICS.lock()
