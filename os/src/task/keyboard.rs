@@ -1,13 +1,18 @@
+use crate::print;
+use crate::println;
 use conquer_once::spin::OnceCell;
+use core::{
+    pin::Pin,
+    task::{Context, Poll},
+};
 use crossbeam_queue::ArrayQueue;
+use futures_util::stream::Stream;
+use futures_util::stream::StreamExt;
+use futures_util::task::AtomicWaker;
+use pc_keyboard::{layouts, DecodedKey, HandleControl, Keyboard, ScancodeSet1};
 
 static SCANCODE_QUEUE: OnceCell<ArrayQueue<u8>> = OnceCell::uninit();
 
-use crate::println;
-
-/// Called by the keyboard interrupt handler
-///
-/// Must not block or allocate.
 pub(crate) fn add_scancode(scancode: u8) {
     if let Ok(queue) = SCANCODE_QUEUE.try_get() {
         if let Err(_) = queue.push(scancode) {
@@ -33,12 +38,6 @@ impl ScancodeStream {
     }
 }
 
-use core::{
-    pin::Pin,
-    task::{Context, Poll},
-};
-use futures_util::stream::Stream;
-
 impl Stream for ScancodeStream {
     type Item = u8;
 
@@ -63,13 +62,7 @@ impl Stream for ScancodeStream {
     }
 }
 
-use futures_util::task::AtomicWaker;
-
 static WAKER: AtomicWaker = AtomicWaker::new();
-
-use crate::print;
-use futures_util::stream::StreamExt;
-use pc_keyboard::{layouts, DecodedKey, HandleControl, Keyboard, ScancodeSet1};
 
 pub async fn print_keypresses() {
     let mut scancodes = ScancodeStream::new();
