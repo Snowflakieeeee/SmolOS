@@ -1,5 +1,6 @@
 use crate::print;
 use crate::println;
+use crate::vga_buffer::Color;
 use conquer_once::spin::OnceCell;
 use core::{
     pin::Pin,
@@ -79,10 +80,11 @@ pub async fn print_keypresses() {
                         text.push(character);
                         print!("{}", character);
                         if text == "ls\n" {
-                            println!("yo die man");
+                            print!(FG: Color::Black, BG: Color::Pink, "yo die man");
+                            println!();
                             text.clear();
                         } else if character == '?' {
-                            println!();
+                            print!("\0");
                             text.clear()
                         }
                     },
