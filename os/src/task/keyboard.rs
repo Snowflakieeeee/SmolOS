@@ -10,6 +10,7 @@ use futures_util::stream::Stream;
 use futures_util::stream::StreamExt;
 use futures_util::task::AtomicWaker;
 use pc_keyboard::{layouts, DecodedKey, HandleControl, Keyboard, ScancodeSet1};
+use alloc::string::String;
 
 static SCANCODE_QUEUE: OnceCell<ArrayQueue<u8>> = OnceCell::uninit();
 
@@ -68,11 +69,23 @@ pub async fn print_keypresses() {
     let mut scancodes = ScancodeStream::new();
     let mut keyboard = Keyboard::new(layouts::Us104Key, ScancodeSet1, HandleControl::Ignore);
 
+    let mut text = String::new();
+
     while let Some(scancode) = scancodes.next().await {
         if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
             if let Some(key) = keyboard.process_keyevent(key_event) {
                 match key {
-                    DecodedKey::Unicode(character) => print!("{}", character),
+                    DecodedKey::Unicode(character) => {
+                        text.push(character);
+                        print!("{}", character);
+                        if text == "ls\n" {
+                            println!("yo die man");
+                            text.clear();
+                        } else if character == '?' {
+                            println!();
+                            text.clear()
+                        }
+                    },
                     DecodedKey::RawKey(key) => print!("{:?}", key),
                 }
             }
