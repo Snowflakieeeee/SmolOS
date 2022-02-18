@@ -17,8 +17,8 @@ impl SimpleExecutor {
     }
 }
 
-use core::task::{Waker, RawWaker};
 use core::task::RawWakerVTable;
+use core::task::{RawWaker, Waker};
 
 fn dummy_raw_waker() -> RawWaker {
     fn no_op(_: *const ()) {}

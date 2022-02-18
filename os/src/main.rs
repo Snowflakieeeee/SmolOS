@@ -13,7 +13,7 @@ use x86_64::VirtAddr;
 
 entry_point!(kernel_main);
 
-use os::task::{Task, simple_executor::SimpleExecutor};
+use os::task::{executor::Executor, keyboard, Task};
 
 fn kernel_main(boot_info: &'static BootInfo) -> ! {
     use os::allocator;
@@ -27,15 +27,10 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     let mut frame_allocator = unsafe { BootInfoFrameAllocator::init(&boot_info.memory_map) };
     allocator::init_heap(&mut mapper, &mut frame_allocator).expect("heap initialization failed");
 
-    let mut executor = SimpleExecutor::new();
+    let mut executor = Executor::new();
     executor.spawn(Task::new(example_task()));
+    executor.spawn(Task::new(keyboard::print_keypresses()));
     executor.run();
-
-    #[cfg(test)]
-    test_main();
-
-    println!("It did not crash!");
-    os::hlt_loop();
 }
 
 async fn async_number() -> u32 {
