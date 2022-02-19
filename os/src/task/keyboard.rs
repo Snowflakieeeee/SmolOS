@@ -99,11 +99,13 @@ pub async fn print_keypresses() {
 fn execute(command: &str) {
     match command {
         "clear" => println!("\0"),
-        "shut-down" => println!("Shut down your computer using the power button, we haven't implemented that yet"),
+        "shut-down" => println!(
+            "Shut down your computer using the power button, we haven't implemented that yet"
+        ),
         "sys-info" => {
             println!("OS: SmolOS");
         }
-        "poop" => println!(FG: Color::Brown,"Someone just pooped ;-;"),
+        "poop" => println!(FG: Color::Brown, "Someone just pooped ;-;"),
         _ => println!(FG: Color::LightRed, "Unknown command"),
     }
 }
