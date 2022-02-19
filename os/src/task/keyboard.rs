@@ -86,7 +86,8 @@ pub async fn print_keypresses() {
                     execute(&text);
                     text.clear();
                     print!(FG: Color::LightGray, "demon@SmolOS:~/$ ");
-                } else if character == '\x08' {  // Backspace
+                } else if character == '\x08' {
+                    // Backspace
                     text.pop();
                 } else {
                     text.push(character);
@@ -102,10 +103,15 @@ fn execute(command: &str) {
         "shut-down" => println!(
             "Shut down your computer using the power button, we haven't implemented that yet"
         ),
-        "sys-info" => {
+        "os-info" => {
             println!("OS: SmolOS");
+            println!("Made in Rust");
+            println!("Made by: Bunch-of-cells, Catt & SnmLogic");
+        }
+        "what is cellulose?" => {
+            println!("Cellulose is a type of organic compound that is found in the soil of plants. It is a natural building block for the synthesis of many other compounds. It is a polymer of Glucose");
         }
         "poop" => println!(FG: Color::Brown, "Someone just pooped ;-;"),
-        _ => println!(FG: Color::LightRed, "Unknown command"),
+        _ => println!(FG: Color::LightRed, "Unknown command: '{}'", command),
     }
 }
