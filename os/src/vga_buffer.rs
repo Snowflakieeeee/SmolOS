@@ -86,7 +86,7 @@ impl Writer {
             }
             b'\0' => {
                 // Clear screen
-                for row in 1..BUFFER_HEIGHT {
+                for row in 0..BUFFER_HEIGHT {
                     self.clear_row(row)
                 }
                 self.column_position = 0;
@@ -160,6 +160,7 @@ impl fmt::Write for Writer {
 macro_rules! print {
     (FG: $fg:expr, BG: $bg:expr, $($arg:tt)*) => ($crate::vga_buffer::_print_fg_bg(format_args!($($arg)*), $fg, $bg));
     (FG: $fg:expr, $($arg:tt)*) => ($crate::vga_buffer::_print_fg_bg(format_args!($($arg)*), $fg, Color::Black));
+    (BG: $bg:expr, $($arg:tt)*) => ($crate::vga_buffer::_print_fg_bg(format_args!($($arg)*), Color::White, $bg));
     ($($arg:tt)*) => ($crate::vga_buffer::_print(format_args!($($arg)*)));
 }
 
@@ -168,6 +169,7 @@ macro_rules! println {
     () => ($crate::print!("\n"));
     (FG: $fg:expr, BG: $bg:expr, $($arg:tt)*) => ({$crate::print!(FG: $fg, BG: $bg, "{}", format_args!($($arg)*)); print!("\n")});
     (FG: $fg:expr, $($arg:tt)*) => ($crate::print!(FG: $fg, "{}\n", format_args!($($arg)*)));
+    (BG: $bg:expr, $($arg:tt)*) => ($crate::print!(BG: $bg, "{}\n", format_args!($($arg)*)));
     ($($arg:tt)*) => ($crate::print!("{}\n", format_args!($($arg)*)));
 }
 

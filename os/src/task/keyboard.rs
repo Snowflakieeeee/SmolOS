@@ -76,28 +76,23 @@ pub async fn print_keypresses() {
     let mut keyboard = Keyboard::new(layouts::Us104Key, ScancodeSet1, HandleControl::Ignore);
 
     let mut text = String::new();
+    let mut type_mode = false;
     print!(FG: Color::LightGray, "demon@SmolOS:~/$ ");
 
     while let Some(scancode) = scancodes.next().await {
         if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
             if let Some(DecodedKey::Unicode(character)) = keyboard.process_keyevent(key_event) {
-                print!("{}", character);
-                if character == '\n' {
-                    execute(&text);
-                    text.clear();
-                    print!(FG: Color::LightGray, "demon@SmolOS:~/$ ");
-                } else if character == '\x08' {
-                    // Backspace
-                    text.pop();
+                if type_mode {
+                    run_editor(&mut text, character, &mut type_mode)
                 } else {
-                    text.push(character);
+                    run_kernel(&mut text, character, &mut type_mode)
                 }
             }
         }
     }
 }
 
-fn execute(command: &str) {
+fn execute(command: &str, type_mode: &mut bool) {
     match command {
         "clear" => println!("\0"),
         "shut-down" => println!(
@@ -108,10 +103,40 @@ fn execute(command: &str) {
             println!("Made in Rust");
             println!("Made by: Bunch-of-cells, Catt & SnmLogic");
         }
+        "type" => {
+            *type_mode = true;
+            print!(FG: Color::White, BG: Color::DarkGray, "\0");
+        },
         "what is cellulose?" => {
             println!("Cellulose is a type of organic compound that is found in the soil of plants. It is a natural building block for the synthesis of many other compounds. It is a polymer of Glucose");
         }
         "poop" => println!(FG: Color::Brown, "Someone just pooped ;-;"),
         _ => println!(FG: Color::LightRed, "Unknown command: '{}'", command),
+    }
+}
+
+fn run_kernel(text: &mut String, character: char, type_mode: &mut bool) {
+    print!("{}", character);
+    if character == '\n' {
+        execute(&text, type_mode);
+        text.clear();
+        if !*type_mode {
+            print!(FG: Color::LightGray, "demon@SmolOS:~/$ ");
+        }
+    } else if character == '\x08' {
+        // Backspace
+        text.pop();
+    } else {
+        text.push(character);
+    }
+}
+
+fn run_editor(text: &mut String, character: char, type_mode: &mut bool) {
+    print!(BG: Color::DarkGray, "{}", character);
+    if character == '\x08' {
+        // Backspace
+        text.pop();
+    } else {
+        text.push(character);
     }
 }
