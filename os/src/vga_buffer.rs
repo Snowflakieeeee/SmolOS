@@ -70,8 +70,7 @@ impl Writer {
     pub fn write_byte(&mut self, byte: u8) {
         match byte {
             b'\n' => self.new_line(),
-            8 => {
-                // Backspace
+            8 => {  // Backspace
                 if self.column_position > 0 {
                     self.column_position -= 1;
                 }
@@ -84,15 +83,13 @@ impl Writer {
                     color_code,
                 });
             }
-            b'\0' => {
-                // Clear screen
+            b'\0' => {  // Clear screen
                 for row in 1..BUFFER_HEIGHT {
                     self.clear_row(row)
                 }
                 self.column_position = 0;
             }
-            byte @ 0x20..=0x7e => {
-                // Printable ASCII
+            byte @ 0x20..=0x7e => {  // Printable ASCII
                 if self.column_position >= BUFFER_WIDTH {
                     self.new_line();
                 }
