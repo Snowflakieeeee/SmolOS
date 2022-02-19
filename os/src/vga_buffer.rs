@@ -1,10 +1,10 @@
 #![allow(dead_code)]
 
+use core::cell::Cell;
 use core::fmt;
 use lazy_static::lazy_static;
 use spin::Mutex;
 use volatile::Volatile;
-use core::cell::Cell;
 
 lazy_static! {
     pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer {
@@ -70,7 +70,8 @@ impl Writer {
     pub fn write_byte(&mut self, byte: u8) {
         match byte {
             b'\n' => self.new_line(),
-            8 => {  // Backspace
+            8 => {
+                // Backspace
                 if self.column_position > 0 {
                     self.column_position -= 1;
                 }
@@ -83,13 +84,15 @@ impl Writer {
                     color_code,
                 });
             }
-            b'\0' => {  // Clear screen
+            b'\0' => {
+                // Clear screen
                 for row in 1..BUFFER_HEIGHT {
                     self.clear_row(row)
                 }
                 self.column_position = 0;
             }
-            byte @  0x20..=0x7e => {  // Printable ASCII
+            byte @ 0x20..=0x7e => {
+                // Printable ASCII
                 if self.column_position >= BUFFER_WIDTH {
                     self.new_line();
                 }
@@ -156,13 +159,15 @@ impl fmt::Write for Writer {
 #[macro_export]
 macro_rules! print {
     (FG: $fg:expr, BG: $bg:expr, $($arg:tt)*) => ($crate::vga_buffer::_print_fg_bg(format_args!($($arg)*), $fg, $bg));
+    (FG: $fg:expr, $($arg:tt)*) => ($crate::vga_buffer::_print_fg_bg(format_args!($($arg)*), $fg, Color::Black));
     ($($arg:tt)*) => ($crate::vga_buffer::_print(format_args!($($arg)*)));
 }
 
 #[macro_export]
 macro_rules! println {
     () => ($crate::print!("\n"));
-    (FG: $fg:expr, BG: $bg:expr, $($arg:tt)*) => ($crate::print!(FG: $fg, BG: $bg, "{}\n", format_args!($($arg)*)));
+    (FG: $fg:expr, BG: $bg:expr, $($arg:tt)*) => ({$crate::print!(FG: $fg, BG: $bg, "{}", format_args!($($arg)*)); print!("\n")});
+    (FG: $fg:expr, $($arg:tt)*) => ($crate::print!(FG: $fg, "{}\n", format_args!($($arg)*)));
     ($($arg:tt)*) => ($crate::print!("{}\n", format_args!($($arg)*)));
 }
 

@@ -8,14 +8,21 @@ use bootloader::{entry_point, BootInfo};
 use core::panic::PanicInfo;
 extern crate alloc;
 
-use os::{println, task::{executor::Executor, keyboard, Task}};
+use os::{
+    println,
+    task::{executor::Executor, keyboard, Task},
+    vga_buffer::Color,
+};
 
 entry_point!(kernel_main);
 
 fn kernel_main(boot_info: &'static BootInfo) -> ! {
-    println!("Hello World!");
-    println!("INFO: Kernel Started");
-    println!("----------------------------------------");
+    println!(FG: Color::Yellow, "Hello World!");
+    println!(FG: Color::Yellow, "INFO: Kernel Started");
+    println!(
+        FG: Color::DarkGray,
+        "----------------------------------------\n"
+    );
     os::init(boot_info);
 
     let mut executor = Executor::new();
