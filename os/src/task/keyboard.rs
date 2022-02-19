@@ -3,6 +3,7 @@ use crate::println;
 use crate::vga_buffer::Color;
 use alloc::string::String;
 use conquer_once::spin::OnceCell;
+use pc_keyboard::KeyCode;
 use core::{
     pin::Pin,
     task::{Context, Poll},
@@ -81,12 +82,23 @@ pub async fn print_keypresses() {
 
     while let Some(scancode) = scancodes.next().await {
         if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
-            if let Some(DecodedKey::Unicode(character)) = keyboard.process_keyevent(key_event) {
-                if type_mode {
-                    run_editor(&mut text, character, &mut type_mode)
-                } else {
-                    run_kernel(&mut text, character, &mut type_mode)
-                }
+            if let Some(key) = keyboard.process_keyevent(key_event) {
+                match key {
+                    DecodedKey::Unicode(character) => {
+                        if type_mode {
+                            run_editor(&mut text, character, &mut type_mode)
+                        } else {
+                            run_kernel(&mut text, character, &mut type_mode)
+                        }
+                    }
+                    DecodedKey::RawKey(key) => {
+                        if type_mode {
+                            run_editor_key(&mut text, key, &mut type_mode)
+                        } else {
+                            run_kernel_key(&mut text, key, &mut type_mode)
+                        }
+                    },
+                } 
             }
         }
     }
@@ -105,7 +117,8 @@ fn execute(command: &str, type_mode: &mut bool) {
         }
         "type" => {
             *type_mode = true;
-            print!(FG: Color::White, BG: Color::DarkGray, "\0");
+            print!(BG: Color::DarkGray, "\0");
+            println!(BG: Color::DarkGray, "Press F5 to exit");
         },
         "what is cellulose?" => {
             println!("Cellulose is a type of organic compound that is found in the soil of plants. It is a natural building block for the synthesis of many other compounds. It is a polymer of Glucose");
@@ -131,16 +144,22 @@ fn run_kernel(text: &mut String, character: char, type_mode: &mut bool) {
     }
 }
 
-fn run_editor(text: &mut String, character: char, type_mode: &mut bool) {
+fn run_kernel_key(_: &mut String, _: KeyCode, _: &mut bool) {}
+
+fn run_editor(text: &mut String, character: char, _: &mut bool) {
     print!(BG: Color::DarkGray, "{}", character);
     if character == '\x08' {
         // Backspace
         text.pop();
-    } else if character == 'q' {
+    } else {
+        text.push(character);
+    }
+}
+
+fn run_editor_key(text: &mut String, key: KeyCode, type_mode: &mut bool) {
+    if key == KeyCode::F5 {
         *type_mode = false;
         text.clear();
         print!(FG: Color::LightGray, "\0demon@SmolOS:~/$ ");
-    } else {
-        text.push(character);
     }
 }
