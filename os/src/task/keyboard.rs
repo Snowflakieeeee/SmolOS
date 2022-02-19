@@ -136,6 +136,10 @@ fn run_editor(text: &mut String, character: char, type_mode: &mut bool) {
     if character == '\x08' {
         // Backspace
         text.pop();
+    } else if character == 'q' {
+        *type_mode = false;
+        text.clear();
+        print!(FG: Color::LightGray, "\0demon@SmolOS:~/$ ");
     } else {
         text.push(character);
     }
