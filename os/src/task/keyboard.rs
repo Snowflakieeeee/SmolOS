@@ -3,7 +3,6 @@ use crate::println;
 use crate::vga_buffer::Color;
 use alloc::string::String;
 use conquer_once::spin::OnceCell;
-use pc_keyboard::KeyCode;
 use core::{
     pin::Pin,
     task::{Context, Poll},
@@ -12,6 +11,7 @@ use crossbeam_queue::ArrayQueue;
 use futures_util::stream::Stream;
 use futures_util::stream::StreamExt;
 use futures_util::task::AtomicWaker;
+use pc_keyboard::KeyCode;
 use pc_keyboard::{layouts, DecodedKey, HandleControl, Keyboard, ScancodeSet1};
 
 static SCANCODE_QUEUE: OnceCell<ArrayQueue<u8>> = OnceCell::uninit();
@@ -86,19 +86,19 @@ pub async fn print_keypresses() {
                 match key {
                     DecodedKey::Unicode(character) => {
                         if type_mode {
-                            run_editor(&mut text, character, &mut type_mode)
+                            run_editor(character)
                         } else {
                             run_kernel(&mut text, character, &mut type_mode)
                         }
                     }
                     DecodedKey::RawKey(key) => {
                         if type_mode {
-                            run_editor_key(&mut text, key, &mut type_mode)
+                            run_editor_key(key, &mut type_mode)
                         } else {
                             run_kernel_key(&mut text, key, &mut type_mode)
                         }
-                    },
-                } 
+                    }
+                }
             }
         }
     }
@@ -117,9 +117,9 @@ fn execute(command: &str, type_mode: &mut bool) {
         }
         "type" => {
             *type_mode = true;
-            print!(BG: Color::DarkGray, "\0");
-            println!(BG: Color::DarkGray, "Press F5 to exit");
-        },
+            print!(BG: Color::LightGray, SCREEN: 1, "\0");
+            println!(FG: Color::Black, BG: Color::LightGray, SCREEN: 1, "Press F5 to exit");
+        }
         "what is cellulose?" => {
             println!("Cellulose is a type of organic compound that is found in the soil of plants. It is a natural building block for the synthesis of many other compounds. It is a polymer of Glucose");
         }
@@ -131,7 +131,7 @@ fn execute(command: &str, type_mode: &mut bool) {
 fn run_kernel(text: &mut String, character: char, type_mode: &mut bool) {
     print!("{}", character);
     if character == '\n' {
-        execute(&text, type_mode);
+        execute(text, type_mode);
         text.clear();
         if !*type_mode {
             print!(FG: Color::LightGray, "demon@SmolOS:~/$ ");
@@ -146,20 +146,13 @@ fn run_kernel(text: &mut String, character: char, type_mode: &mut bool) {
 
 fn run_kernel_key(_: &mut String, _: KeyCode, _: &mut bool) {}
 
-fn run_editor(text: &mut String, character: char, _: &mut bool) {
-    print!(BG: Color::DarkGray, "{}", character);
-    if character == '\x08' {
-        // Backspace
-        text.pop();
-    } else {
-        text.push(character);
-    }
+fn run_editor(character: char) {
+    print!(BG: Color::LightGray, SCREEN: 1, "{}", character);
 }
 
-fn run_editor_key(text: &mut String, key: KeyCode, type_mode: &mut bool) {
+fn run_editor_key(key: KeyCode, type_mode: &mut bool) {
     if key == KeyCode::F5 {
         *type_mode = false;
-        text.clear();
-        print!(FG: Color::LightGray, "\0demon@SmolOS:~/$ ");
+        print!(FG: Color::LightGray, "demon@SmolOS:~/$ ");
     }
 }
