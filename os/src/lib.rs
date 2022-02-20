@@ -6,6 +6,7 @@
 #![reexport_test_harness_main = "test_main"]
 #![feature(alloc_error_handler)]
 #![feature(const_mut_refs)]
+#![allow(clippy::missing_safety_doc)] // Will probably remove this in future
 
 use core::panic::PanicInfo;
 
@@ -71,13 +72,13 @@ pub fn init(boot_info: &'static BootInfo) {
 }
 
 pub fn init_screens() {
+    println!(FG: Color::Black, BG: Color::LightGray, SCREEN: 1, "Press F5 to exit");
     println!(FG: Color::Yellow, "Hello World!");
     println!(FG: Color::Yellow, "INFO: Kernel Started");
     println!(
         FG: Color::DarkGray,
         "----------------------------------------\n"
     );
-    println!(FG: Color::Black, BG: Color::LightGray, SCREEN: 1, "Press F5 to exit");
 }
 
 pub fn hlt_loop() -> ! {
