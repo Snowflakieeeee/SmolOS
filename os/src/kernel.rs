@@ -10,7 +10,7 @@ pub async fn handle_kernel() {
     let mut command = String::new();
     let mut type_mode = false;
     let mut files = Vec::<File>::new();
-    print!(FG: Color::LightGray, "demon@SmolOS:~/$ ");
+    print!(FG: Color::LightGreen, "demon@SmolOS:~/$ ");
 
     while let Some(scancode) = scancodes.next().await {
         if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
@@ -40,6 +40,7 @@ pub async fn handle_kernel() {
                                 match &*command.split_whitespace().collect::<Vec<_>>() {
                                     [] => (),
                                     ["clear"] => println!("\0"),
+                                    ["hi" | "hello"] => println!("hello :)"),
                                     ["shut-down"] => println!(
                                         "Shut down your computer using the power button, we haven't implemented that yet"
                                     ),
@@ -114,7 +115,7 @@ pub async fn handle_kernel() {
                                     _ => println!(FG: Color::LightRed, "Unknown command: '{}'", command),
                                 };
                                 command.clear();
-                                print!(FG: Color::LightGray, "demon@SmolOS:~/$ ");
+                                print!(FG: Color::LightGreen, "demon@SmolOS:~/$ ");
                                 if type_mode {
                                     print!(SCREEN: 1, "\x1b");
                                 }
