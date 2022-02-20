@@ -26,6 +26,8 @@ use bootloader::BootInfo;
 use memory::BootInfoFrameAllocator;
 use x86_64::VirtAddr;
 
+use crate::vga_buffer::Color;
+
 #[cfg(test)]
 entry_point!(test_kernel_main);
 
@@ -66,6 +68,16 @@ pub fn init(boot_info: &'static BootInfo) {
     let mut mapper = unsafe { memory::init(phys_mem_offset) };
     let mut frame_allocator = unsafe { BootInfoFrameAllocator::init(&boot_info.memory_map) };
     allocator::init_heap(&mut mapper, &mut frame_allocator).expect("heap initialization failed");
+}
+
+pub fn init_screens() {
+    println!(FG: Color::Yellow, "Hello World!");
+    println!(FG: Color::Yellow, "INFO: Kernel Started");
+    println!(
+        FG: Color::DarkGray,
+        "----------------------------------------\n"
+    );
+    println!(FG: Color::Black, BG: Color::LightGray, SCREEN: 1, "Press F5 to exit");
 }
 
 pub fn hlt_loop() -> ! {

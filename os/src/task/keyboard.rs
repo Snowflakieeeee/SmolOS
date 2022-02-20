@@ -117,8 +117,6 @@ fn execute(command: &str, type_mode: &mut bool) {
         }
         "type" => {
             *type_mode = true;
-            print!(BG: Color::LightGray, SCREEN: 1, "\0");
-            println!(FG: Color::Black, BG: Color::LightGray, SCREEN: 1, "Press F5 to exit");
         }
         "what is cellulose?" => {
             println!("Cellulose is a type of organic compound that is found in the soil of plants. It is a natural building block for the synthesis of many other compounds. It is a polymer of Glucose");
@@ -133,8 +131,9 @@ fn run_kernel(text: &mut String, character: char, type_mode: &mut bool) {
     if character == '\n' {
         execute(text, type_mode);
         text.clear();
-        if !*type_mode {
-            print!(FG: Color::LightGray, "demon@SmolOS:~/$ ");
+        print!(FG: Color::LightGray, "demon@SmolOS:~/$ ");
+        if *type_mode {
+            print!(SCREEN: 1, "\x1b");
         }
     } else if character == '\x08' {
         // Backspace
@@ -153,6 +152,6 @@ fn run_editor(character: char) {
 fn run_editor_key(key: KeyCode, type_mode: &mut bool) {
     if key == KeyCode::F5 {
         *type_mode = false;
-        print!(FG: Color::LightGray, "demon@SmolOS:~/$ ");
+        print!("\x1b");
     }
 }

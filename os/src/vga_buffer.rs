@@ -102,7 +102,7 @@ pub struct Writer {
 }
 
 impl Writer {
-    pub fn new() -> Self {
+    fn new() -> Self {
         Writer {
             buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
             screens: [
@@ -116,7 +116,8 @@ impl Writer {
     pub fn write_byte(&mut self, byte: u8) {
         match byte {
             b'\n' => self.new_line(),
-            8 => {
+            b'\x1b' => (),
+            b'\x08' => {
                 // Backspace
                 if self.screens[self.screen].column_position > 0 {
                     self.screens[self.screen].column_position -= 1;
@@ -238,13 +239,10 @@ pub fn _print(args: fmt::Arguments, fg: Color, bg: Color, screen: usize) {
 
     let mut writer = WRITER.lock();
     writer.screen = screen;
-    let color_code = writer.screens[screen].color_code;
     writer.screens[screen].color_code = ColorCode::new(fg, bg);
     interrupts::without_interrupts(|| {
         writer.write_fmt(args).unwrap();
     });
-    writer.screens[screen].color_code = color_code;
-    writer.screen = 0;
 }
 
 #[test_case]
