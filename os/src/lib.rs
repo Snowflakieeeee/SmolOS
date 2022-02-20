@@ -72,7 +72,6 @@ pub fn init(boot_info: &'static BootInfo) {
 }
 
 pub fn init_screens() {
-    println!(FG: Color::Black, BG: Color::LightGray, SCREEN: 1, "Press Esc to exit");
     println!(FG: Color::Yellow, "[INFO] Kernel Started");
     println!(
         FG: Color::DarkGray,
