@@ -17,15 +17,13 @@ pub async fn handle_kernel() {
                 match key {
                     DecodedKey::Unicode(character) => {
                         if type_mode {
-                            run_editor(character)
+                            run_editor(character, &mut type_mode)
                         } else {
                             run_kernel(&mut text, character, &mut type_mode)
                         }
                     }
                     DecodedKey::RawKey(key) => {
-                        if type_mode {
-                            run_editor_key(key, &mut type_mode)
-                        } else {
+                        if !type_mode {
                             run_kernel_key(&mut text, key, &mut type_mode)
                         }
                     }
@@ -76,13 +74,11 @@ fn run_kernel(text: &mut String, character: char, type_mode: &mut bool) {
 
 fn run_kernel_key(_: &mut String, _: KeyCode, _: &mut bool) {}
 
-fn run_editor(character: char) {
-    print!(BG: Color::LightGray, SCREEN: 1, "{}", character);
-}
-
-fn run_editor_key(key: KeyCode, type_mode: &mut bool) {
-    if key == KeyCode::F5 {
+fn run_editor(character: char, type_mode: &mut bool) {
+    if character == '\x1b' {
         *type_mode = false;
         print!("\x1b");
+    } else {
+        print!(BG: Color::LightGray, SCREEN: 1, "{}", character);
     }
 }
