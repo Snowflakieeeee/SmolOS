@@ -19,7 +19,7 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     os::init_screens();
 
     let mut executor = Executor::new();
-    executor.spawn(Task::new(kernel::handle_kernel()));
+    executor.spawn(Task::new(kernel::handle_main()));
     executor.run();
 }
 
