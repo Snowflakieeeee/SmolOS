@@ -162,6 +162,34 @@ fn execute(command: &str, type_mode: &mut bool, files: &mut Vec<File>) {
         ["what", "is", "cellulose?"] => {
             println!("Cellulose is a type of organic compound that is found in the soil of plants. It is a natural building block for the synthesis of many other compounds. It is a polymer of Glucose");
         }
+        [a, "+", b] => {
+            if let (Ok(a), Ok(b)) = (a.parse::<i32>(), b.parse::<i32>()) {
+                println!("{}", a + b);
+            } else {
+                println!("Invalid input");
+            }
+        }
+        [a, "*", b] => {
+            if let (Ok(a), Ok(b)) = (a.parse::<i32>(), b.parse::<i32>()) {
+                println!("{}", a * b);
+            } else {
+                println!("Invalid input");
+            }
+        }
+        [a, "-", b] => {
+            if let (Ok(a), Ok(b)) = (a.parse::<i32>(), b.parse::<i32>()) {
+                println!("{}", a - b);
+            } else {
+                println!("Invalid input");
+            }
+        }
+        [a, "/", b] => {
+            if let (Ok(a), Some(b)) = (a.parse::<i32>(), b.parse::<i32>().ok().filter(|&a| a != 0)) {
+                println!("{}", a / b);
+            } else {
+                println!("Invalid input");
+            }
+        }
         ["poop"] => println!(FG: Color::Brown, "Someone just pooped ;-;"),
         _ => println!(FG: Color::LightRed, "Unknown command: '{}'", command),
     };
