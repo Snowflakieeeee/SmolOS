@@ -63,7 +63,7 @@ fn handle_kernel(files: &mut Vec<File>, character: char, type_mode: &mut bool, c
 }
 
 fn execute(command: &str, type_mode: &mut bool, files: &mut Vec<File>) {
-    match &*command.split_whitespace().collect::<Vec<_>>() {
+    match *command.split_whitespace().collect::<Vec<_>>() {
         [] => (),
         ["clear"] => println!("\0"),
         ["hi" | "hello"] => println!("hello :)"),
@@ -112,7 +112,7 @@ fn execute(command: &str, type_mode: &mut bool, files: &mut Vec<File>) {
             }
         }
         ["open", filename] => {
-            if let Some(idx) = files.iter().position(|x| matches!(x.name, Some(ref s) if s == *filename)) {
+            if let Some(idx) = files.iter().position(|x| matches!(x.name, Some(ref s) if s == filename)) {
                 let len = files.len() - 1;
                 files.swap(idx, len);
             } else {
@@ -120,7 +120,7 @@ fn execute(command: &str, type_mode: &mut bool, files: &mut Vec<File>) {
             }
         }
         ["delete", filename] => {
-            if let Some(idx) = files.iter().position(|x| matches!(x.name, Some(ref s) if s == *filename)) {
+            if let Some(idx) = files.iter().position(|x| matches!(x.name, Some(ref s) if s == filename)) {
                 files.remove(idx);
             } else {
                 println!("No such file found");
