@@ -68,6 +68,7 @@ struct Screen {
     chars: [[ScreenChar; BUFFER_WIDTH]; BUFFER_HEIGHT],
     color_code: ColorCode,
     column_position: usize,
+    auto_new_line: bool,
 }
 
 impl Screen {
@@ -81,6 +82,7 @@ impl Screen {
                     color_code,
                 })
             }),
+            auto_new_line: false,
         }
     }
 }
@@ -115,20 +117,37 @@ impl Writer {
 
     fn write_byte(&mut self, byte: u8) {
         match byte {
-            b'\n' => self.new_line(),
+            b'\n' => {
+                self.new_line();
+                self.screens[self.screen].auto_new_line = false;
+            }
             b'\x1b' => (),
             b'\x08' => {
                 // Backspace
                 if self.screens[self.screen].column_position > 0 {
                     self.screens[self.screen].column_position -= 1;
+                    let col = self.screens[self.screen].column_position;
+                    self.screens[self.screen].chars[BUFFER_HEIGHT - 1][col] = ScreenChar {
+                        ascii_character: b' ',
+                        color_code: self.screens[self.screen].color_code,
+                    };
+                } else {
+                    for row in (0..BUFFER_HEIGHT - 1).rev() {
+                        for col in 0..BUFFER_WIDTH {
+                            self.screens[self.screen].chars[row + 1][col] =
+                                self.screens[self.screen].chars[row][col];
+                        }
+                    }
+                    self.screens[self.screen].column_position = BUFFER_WIDTH;
+                    if self.screens[self.screen].auto_new_line == true {
+                        self.screens[self.screen].column_position -= 1;
+                        let col = self.screens[self.screen].column_position;
+                        self.screens[self.screen].chars[BUFFER_HEIGHT - 1][col] = ScreenChar {
+                            ascii_character: b' ',
+                            color_code: self.screens[self.screen].color_code,
+                        };
+                    }
                 }
-                let row = BUFFER_HEIGHT - 1;
-                let col = self.screens[self.screen].column_position;
-
-                self.screens[self.screen].chars[row][col] = ScreenChar {
-                    ascii_character: b' ',
-                    color_code: self.screens[self.screen].color_code,
-                };
             }
             b'\0' => {
                 // Clear screen
@@ -173,6 +192,7 @@ impl Writer {
     }
 
     fn new_line(&mut self) {
+        self.screens[self.screen].auto_new_line = true;
         for row in 1..BUFFER_HEIGHT {
             for col in 0..BUFFER_WIDTH {
                 self.screens[self.screen].chars[row - 1][col] =

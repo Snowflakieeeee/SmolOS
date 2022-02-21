@@ -72,7 +72,9 @@ pub fn init(boot_info: &'static BootInfo) {
 }
 
 pub fn init_screens() {
-    println!(FG: Color::LightCyan, "
+    println!(
+        FG: Color::LightCyan,
+        "
                                                             ,//*.       
                                                     .,///((/*.       
                                                     .*//((((/*.       
@@ -84,8 +86,12 @@ pub fn init_screens() {
             ((((((((/*/((((((((((((((((((((((((((((((***,               
             ((((/,... ./((((((((((((((((((((((((/*...                   
             *(((((((((((((((((((((((((((((,                          
-                ,*************************,");
-    println!(FG: Color::White, "                             SmolOS\n\n\n");
+                ,*************************,"
+    );
+    println!(
+        FG: Color::White,
+        "                             SmolOS\n\n\n"
+    );
 }
 
 pub fn hlt_loop() -> ! {

@@ -30,14 +30,16 @@ pub async fn handle_main() {
     }
 }
 
-fn handle_type_mode(files: &mut Vec<File>, character: char, type_mode: &mut bool)  {
+fn handle_type_mode(files: &mut Vec<File>, character: char, type_mode: &mut bool) {
     if let Some(file) = files.last_mut() {
         if character == '\x1b' {
             *type_mode = false;
             return print!("\x1b");
         }
         if character == '\x08' {
-            file.content.pop();
+            if file.content.pop().is_none() {
+                return;
+            };
         } else {
             file.content.push(character);
         }
@@ -45,7 +47,12 @@ fn handle_type_mode(files: &mut Vec<File>, character: char, type_mode: &mut bool
     }
 }
 
-fn handle_kernel(files: &mut Vec<File>, character: char, type_mode: &mut bool, command: &mut String) {
+fn handle_kernel(
+    files: &mut Vec<File>,
+    character: char,
+    type_mode: &mut bool,
+    command: &mut String,
+) {
     if character == '\x08' && command.pop().is_none() {
         return;
     }
@@ -89,7 +96,7 @@ fn execute(command: &str, type_mode: &mut bool, files: &mut Vec<File>) {
             println!("     save");
         }
         ["type"] => {
-            if let Some(File {content, ..}) = files.last() {
+            if let Some(File { content, .. }) = files.last() {
                 *type_mode = true;
                 println!(FG: Color::Black, BG: Color::LightGray, SCREEN: 1, "\0Press Esc to exit");
                 print!(FG: Color::White, BG: Color::LightGray, SCREEN: 1, "{}", content)
@@ -98,21 +105,24 @@ fn execute(command: &str, type_mode: &mut bool, files: &mut Vec<File>) {
             }
         }
         ["new"] => {
-            if files.last().map(|x|x.name.is_none()).unwrap_or(false) {
+            if files.last().map(|x| x.name.is_none()).unwrap_or(false) {
                 println!("Current file not saved");
             } else {
                 files.push(File::new());
             }
         }
         ["save", filename] => {
-            if let Some(File { name, ..}) = files.last_mut() {
+            if let Some(File { name, .. }) = files.last_mut() {
                 *name = Some((*filename).to_owned());
             } else {
                 println!("No file has been opened");
             }
         }
         ["open", filename] => {
-            if let Some(idx) = files.iter().position(|x| matches!(x.name, Some(ref s) if s == filename)) {
+            if let Some(idx) = files
+                .iter()
+                .position(|x| matches!(x.name, Some(ref s) if s == filename))
+            {
                 let len = files.len() - 1;
                 files.swap(idx, len);
             } else {
@@ -120,13 +130,16 @@ fn execute(command: &str, type_mode: &mut bool, files: &mut Vec<File>) {
             }
         }
         ["delete", filename] => {
-            if let Some(idx) = files.iter().position(|x| matches!(x.name, Some(ref s) if s == filename)) {
+            if let Some(idx) = files
+                .iter()
+                .position(|x| matches!(x.name, Some(ref s) if s == filename))
+            {
                 files.remove(idx);
             } else {
                 println!("No such file found");
             }
         }
-        ["what", "is" ,"cellulose?"] => {
+        ["what", "is", "cellulose?"] => {
             println!("Cellulose is a type of organic compound that is found in the soil of plants. It is a natural building block for the synthesis of many other compounds. It is a polymer of Glucose");
         }
         ["poop"] => println!(FG: Color::Brown, "Someone just pooped ;-;"),
