@@ -146,6 +146,7 @@ impl Writer {
                             ascii_character: b' ',
                             color_code: self.screens[self.screen].color_code,
                         };
+                        self.screens[self.screen].auto_new_line = false;
                     }
                 }
             }
@@ -173,9 +174,8 @@ impl Writer {
                 if self.screens[self.screen].column_position >= BUFFER_WIDTH {
                     self.new_line();
                 }
-                let row = BUFFER_HEIGHT - 1;
                 let col = self.screens[self.screen].column_position;
-                self.screens[self.screen].chars[row][col] = ScreenChar {
+                self.screens[self.screen].chars[BUFFER_HEIGHT - 1][col] = ScreenChar {
                     ascii_character: 0xfe,
                     color_code: self.screens[self.screen].color_code,
                 };

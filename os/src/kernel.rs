@@ -94,6 +94,7 @@ fn execute(command: &str, type_mode: &mut bool, files: &mut Vec<File>) {
             println!("     open");
             println!("     delete");
             println!("     save");
+            println!("     discard");
         }
         ["type"] => {
             if let Some(File { content, .. }) = files.last() {
@@ -139,18 +140,29 @@ fn execute(command: &str, type_mode: &mut bool, files: &mut Vec<File>) {
                 println!("No such file found");
             }
         }
+        ["discard"] => {
+            if files.pop().is_none() {
+                println!("No file has been opened");
+            }
+        }
+        ["ls"] => {
+            if files.is_empty() {
+                println!("No files opened");
+            } else {
+                println!("Files:");
+                for file in files {
+                    if let Some(name) = &file.name {
+                        println!("     {}", name);
+                    } else {
+                        println!("     (unsaved)");
+                    }
+                }
+            }
+        }
         ["what", "is", "cellulose?"] => {
             println!("Cellulose is a type of organic compound that is found in the soil of plants. It is a natural building block for the synthesis of many other compounds. It is a polymer of Glucose");
         }
         ["poop"] => println!(FG: Color::Brown, "Someone just pooped ;-;"),
-        ["ls"] => {
-            println!("Available files:");
-            for file in files {
-                if let Some(ref name) = file.name {
-                    println!("     {}", name);
-                }
-            }
-        }
         _ => println!(FG: Color::LightRed, "Unknown command: '{}'", command),
     };
 }
