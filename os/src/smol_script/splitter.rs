@@ -35,7 +35,7 @@ where
         loop {
             match self.iterator.borrow_mut().peek() {
                 Some(item) => {
-                    if (self.splitter.borrow_mut())(&item) {
+                    if (self.splitter.borrow_mut())(item) {
                         return Some(Splitted {
                             splitter: Rc::clone(&self.splitter),
                             iterator: Rc::clone(&self.iterator),

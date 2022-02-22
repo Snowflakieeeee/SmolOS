@@ -36,7 +36,7 @@ pub fn lex(filename: String, contents: &str) -> Vec<Token> {
 
     tokens.push(Token::new(
         Position::new(contents.len(), contents.len(), Rc::clone(&file)),
-        TokenType::EOF,
+        TokenType::Eof,
     ));
 
     tokens

@@ -139,7 +139,7 @@ impl Writer {
                         }
                     }
                     self.screens[self.screen].column_position = BUFFER_WIDTH;
-                    if self.screens[self.screen].auto_new_line == true {
+                    if self.screens[self.screen].auto_new_line {
                         self.screens[self.screen].column_position -= 1;
                         let col = self.screens[self.screen].column_position;
                         self.screens[self.screen].chars[BUFFER_HEIGHT - 1][col] = ScreenChar {

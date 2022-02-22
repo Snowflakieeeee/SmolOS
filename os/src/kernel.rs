@@ -1,4 +1,8 @@
-use alloc::{borrow::ToOwned, string::String, vec::Vec};
+use alloc::{
+    borrow::ToOwned,
+    string::{String, ToString},
+    vec::Vec,
+};
 use futures_util::stream::StreamExt;
 use os::{print, println, smol_script, task::keyboard::ScancodeStream, vga_buffer::Color};
 use pc_keyboard::{layouts, DecodedKey, HandleControl, Keyboard, ScancodeSet1};
@@ -30,7 +34,7 @@ pub async fn handle_main() {
     }
 }
 
-fn handle_type_mode(files: &mut Vec<File>, character: char, type_mode: &mut bool) {
+fn handle_type_mode(files: &mut [File], character: char, type_mode: &mut bool) {
     if let Some(file) = files.last_mut() {
         if character == '\x1b' {
             *type_mode = false;
@@ -162,6 +166,13 @@ fn execute(command: &str, type_mode: &mut bool, files: &mut Vec<File>) {
         ["what", "is", "cellulose?"] => {
             println!("Cellulose is a type of organic compound that is found in the soil of plants. It is a natural building block for the synthesis of many other compounds. It is a polymer of Glucose");
         }
+        ["run"] => match files.last() {
+            None => println!("No file on the stack"),
+            Some(File { name, content }) => smol_script::run(
+                (name.as_ref().map(|s| &**s).unwrap_or("(unsaved)")).to_string(),
+                content,
+            ),
+        },
         [a, "+", b] => {
             if let (Ok(a), Ok(b)) = (a.parse::<i32>(), b.parse::<i32>()) {
                 println!("{}", a + b);

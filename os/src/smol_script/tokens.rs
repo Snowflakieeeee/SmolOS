@@ -21,5 +21,5 @@ pub enum TokenType {
     Identifier(String),
     Number(f64),
     Keyword(String),
-    EOF,
+    Eof,
 }
