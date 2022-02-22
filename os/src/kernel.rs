@@ -13,8 +13,9 @@ pub async fn handle_main() {
 
     let mut command = String::new();
     let mut type_mode = false;
+    let mut name = "DefaultUser".to_string();
     let mut files = Vec::<File>::new();
-    print!(FG: Color::LightGreen, "demon@SmolOS:~/$ ");
+    print!(FG: Color::LightGreen, "{}@SmolOS:~/$ ", name);
 
     while let Some(scancode) = scancodes.next().await {
         if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
@@ -22,9 +23,36 @@ pub async fn handle_main() {
                 match key {
                     DecodedKey::Unicode(character) => {
                         if type_mode {
-                            handle_type_mode(&mut files, character, &mut type_mode);
+                            if let Some(file) = files.last_mut() {
+                                if character == '\x1b' {
+                                    type_mode = false;
+                                    print!("\x1b");
+                                    continue;
+                                }
+                                if character == '\x08' {
+                                    if file.content.pop().is_none() {
+                                        continue;
+                                    };
+                                } else {
+                                    file.content.push(character);
+                                }
+                                print!(BG: Color::LightGray, SCREEN: 1, "{}", character);
+                            }
                         } else {
-                            handle_kernel(&mut files, character, &mut type_mode, &mut command)
+                            if character == '\x08' && command.pop().is_none() {
+                                continue;
+                            }
+                            print!("{}", character);
+                            if character == '\n' {
+                                execute(&mut command, &mut type_mode, &mut files, &mut name);
+                                command.clear();
+                                print!(FG: Color::LightGreen, "{}@SmolOS:~/$ ", name);
+                                if type_mode {
+                                    print!(SCREEN: 1, "\x1b");
+                                }
+                            } else if character != '\x08' {
+                                command.push(character);
+                            }
                         }
                     }
                     DecodedKey::RawKey(_) => {}
@@ -34,46 +62,7 @@ pub async fn handle_main() {
     }
 }
 
-fn handle_type_mode(files: &mut [File], character: char, type_mode: &mut bool) {
-    if let Some(file) = files.last_mut() {
-        if character == '\x1b' {
-            *type_mode = false;
-            return print!("\x1b");
-        }
-        if character == '\x08' {
-            if file.content.pop().is_none() {
-                return;
-            };
-        } else {
-            file.content.push(character);
-        }
-        print!(BG: Color::LightGray, SCREEN: 1, "{}", character);
-    }
-}
-
-fn handle_kernel(
-    files: &mut Vec<File>,
-    character: char,
-    type_mode: &mut bool,
-    command: &mut String,
-) {
-    if character == '\x08' && command.pop().is_none() {
-        return;
-    }
-    print!("{}", character);
-    if character == '\n' {
-        execute(command, type_mode, files);
-        command.clear();
-        print!(FG: Color::LightGreen, "demon@SmolOS:~/$ ");
-        if *type_mode {
-            print!(SCREEN: 1, "\x1b");
-        }
-    } else if character != '\x08' {
-        command.push(character);
-    }
-}
-
-fn execute(command: &str, type_mode: &mut bool, files: &mut Vec<File>) {
+fn execute<'a>(command: &str, type_mode: &mut bool, files: &mut Vec<File>, user_name: &mut String) {
     match *command.split_whitespace().collect::<Vec<_>>() {
         [] => (),
         ["clear"] => println!("\0"),
@@ -81,6 +70,9 @@ fn execute(command: &str, type_mode: &mut bool, files: &mut Vec<File>) {
         ["shut-down"] => println!(
             "Shut down your computer using the power button, we haven't implemented that yet"
         ),
+        ["customize", "name", name] => {
+            *user_name = name.to_string();
+        }
         ["os-info"] => {
             println!("OS: SmolOS");
             println!("Made in Rust");
