@@ -1,6 +1,6 @@
 use alloc::{borrow::ToOwned, string::String, vec::Vec};
 use futures_util::stream::StreamExt;
-use os::{print, println, task::keyboard::ScancodeStream, vga_buffer::Color};
+use os::{print, println, smol_script, task::keyboard::ScancodeStream, vga_buffer::Color};
 use pc_keyboard::{layouts, DecodedKey, HandleControl, Keyboard, ScancodeSet1};
 
 pub async fn handle_main() {
@@ -147,7 +147,7 @@ fn execute(command: &str, type_mode: &mut bool, files: &mut Vec<File>) {
         }
         ["ls"] => {
             if files.is_empty() {
-                println!("No files opened");
+                println!("No files to show");
             } else {
                 println!("Files:");
                 for file in files {
@@ -184,7 +184,8 @@ fn execute(command: &str, type_mode: &mut bool, files: &mut Vec<File>) {
             }
         }
         [a, "/", b] => {
-            if let (Ok(a), Some(b)) = (a.parse::<i32>(), b.parse::<i32>().ok().filter(|&a| a != 0)) {
+            if let (Ok(a), Some(b)) = (a.parse::<i32>(), b.parse::<i32>().ok().filter(|&a| a != 0))
+            {
                 println!("{}", a / b);
             } else {
                 println!("Invalid input");
