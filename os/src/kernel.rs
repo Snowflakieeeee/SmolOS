@@ -62,7 +62,7 @@ pub async fn handle_main() {
     }
 }
 
-fn execute<'a>(command: &str, type_mode: &mut bool, files: &mut Vec<File>, user_name: &mut String) {
+fn execute(command: &str, type_mode: &mut bool, files: &mut Vec<File>, user_name: &mut String) {
     match *command.split_whitespace().collect::<Vec<_>>() {
         [] => (),
         ["clear"] => println!("\0"),
@@ -70,9 +70,7 @@ fn execute<'a>(command: &str, type_mode: &mut bool, files: &mut Vec<File>, user_
         ["shut-down"] => println!(
             "Shut down your computer using the power button, we haven't implemented that yet"
         ),
-        ["customize", "name", name] => {
-            *user_name = name.to_string();
-        }
+        ["customize", "name", name] => *user_name = name.to_string(),
         ["os-info"] => {
             println!("OS: SmolOS");
             println!("Made in Rust");
