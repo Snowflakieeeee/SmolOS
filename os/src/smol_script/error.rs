@@ -1,3 +1,5 @@
+use core::fmt::Display;
+
 use alloc::{rc::Rc, string::String};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -10,6 +12,14 @@ pub struct Position {
 impl Position {
     pub fn new(start: usize, end: usize, file: Rc<String>) -> Self {
         Self { start, end, file }
+    }
+
+    pub fn merge(&self, other: &Self) -> Self {
+        Self {
+            start: self.start.min(other.start),
+            end: self.end.max(other.end),
+            file: Rc::clone(&self.file),
+        }
     }
 }
 
@@ -31,4 +41,17 @@ impl Error {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum ErrorType {}
+pub enum ErrorType {
+    UndefinedWord,
+    SyntaxError,
+}
+
+impl Display for Error {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(
+            f,
+            "{:?} in {} at {} to {} :: {}",
+            self.error, self.position.file, self.position.start, self.position.end, self.details
+        )
+    }
+}
