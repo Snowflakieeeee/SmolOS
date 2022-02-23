@@ -4,7 +4,7 @@ use alloc::string::String;
 
 use super::error::Position;
 
-pub const KEYWORDS: [&str; 6] = ["let", "fn", "if", "else", "true", ";"];
+pub const KEYWORDS: [&str; 7] = ["fn", "if", "else", "while", "{", "}", ";"];
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Token {
