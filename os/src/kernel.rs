@@ -44,7 +44,7 @@ pub async fn handle_main() {
                             }
                             print!("{}", character);
                             if character == '\n' {
-                                execute(&mut command, &mut type_mode, &mut files, &mut name);
+                                execute(&command, &mut type_mode, &mut files, &mut name);
                                 command.clear();
                                 print!(FG: Color::LightGreen, "{}@SmolOS:~/$ ", name);
                                 if type_mode {

@@ -1,11 +1,11 @@
-use alloc::{format, string::String, vec::Vec};
-
-// use crate::println;
+use alloc::{borrow::ToOwned, format, vec::Vec};
 
 use super::{
     error::{Error, ErrorType},
+    function::Function,
     node::Node,
     tokens::{Token, TokenType},
+    DEFINED_FUNCTIONS,
 };
 
 type ParseResult = Result<Node, Error>;
@@ -13,7 +13,7 @@ type ParseResult = Result<Node, Error>;
 struct Parser {
     tokens: Vec<Token>,
     current: Token,
-    defined: Vec<String>,
+    defined: Vec<Function>,
     index: usize,
 }
 
@@ -38,25 +38,35 @@ impl Parser {
         let pos = self.current.position.clone();
         let mut statements = Vec::new();
         while self.current.token != TokenType::Eof {
-            statements.push(self.statement()?);
+            statements.push(self.expression()?);
         }
         self.advance();
         Ok(Node::Nodes(statements, pos.merge(&self.current.position)))
     }
 
-    fn statement(&mut self) -> ParseResult {
+    fn expression(&mut self) -> ParseResult {
         match self.current.token {
             TokenType::Identifier(ref ident) => {
-                if !self.is_defined(&ident) {
+                if let Some(f) = self.defined.iter().find(|f| f.name() == ident).cloned() {
+                    self.advance();
+                    let mut args = Vec::new();
+                    for _ in 0..f.args().len() {
+                        args.push(self.expression()?);
+                    }
+                    Ok(Node::Function(f.name().to_owned(), f.ret(), args))
+                } else if let Some(f) = DEFINED_FUNCTIONS.iter().find(|f| f.name() == ident) {
+                    self.advance();
+                    let mut args = Vec::new();
+                    for _ in 0..f.args().len() {
+                        args.push(self.expression()?);
+                    }
+                    Ok(Node::Function(f.name().to_owned(), f.ret(), args))
+                } else {
                     Err(Error::new(
                         ErrorType::UndefinedWord,
                         format!("'{}' is not defined", ident),
                         self.current.position.clone(),
                     ))
-                } else {
-                    let node = Ok(Node::Word(ident.clone(), self.current.position.clone()));
-                    self.advance();
-                    node
                 }
             }
             TokenType::Number(_) => {
@@ -71,10 +81,6 @@ impl Parser {
                 self.current.position.clone(),
             )),
         }
-    }
-
-    fn is_defined(&self, token: &String) -> bool {
-        self.defined.contains(token)
     }
 }
 

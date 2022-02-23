@@ -4,8 +4,6 @@ use alloc::string::String;
 
 use super::error::Position;
 
-pub const KEYWORDS: [&str; 7] = ["fn", "if", "else", "while", "{", "}", ";"];
-
 #[derive(Debug, Clone, PartialEq)]
 pub struct Token {
     pub position: Position,

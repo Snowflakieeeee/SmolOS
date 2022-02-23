@@ -7,6 +7,7 @@
 #![feature(alloc_error_handler)]
 #![feature(const_mut_refs)]
 #![allow(clippy::missing_safety_doc)] // Will probably remove this in future
+#![feature(const_fn_fn_ptr_basics)] // Most likely will be removed
 
 use core::panic::PanicInfo;
 

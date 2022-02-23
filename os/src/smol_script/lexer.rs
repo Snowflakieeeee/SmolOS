@@ -1,7 +1,8 @@
 use super::{
     error::Position,
     splitter::Splitter,
-    tokens::{Token, TokenType, KEYWORDS},
+    tokens::{Token, TokenType},
+    KEYWORDS,
 };
 use alloc::{rc::Rc, string::String, vec::Vec};
 
