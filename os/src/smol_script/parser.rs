@@ -1,5 +1,7 @@
 use alloc::{format, string::String, vec::Vec};
 
+// use crate::println;
+
 use super::{
     error::{Error, ErrorType},
     node::Node,
@@ -52,10 +54,16 @@ impl Parser {
                         self.current.position.clone(),
                     ))
                 } else {
-                    Ok(Node::Word(ident.clone(), self.current.position.clone()))
+                    let node = Ok(Node::Word(ident.clone(), self.current.position.clone()));
+                    self.advance();
+                    node
                 }
             }
-            TokenType::Number(_) => Ok(Node::Number(self.current.clone())),
+            TokenType::Number(_) => {
+                let node = Ok(Node::Number(self.current.clone()));
+                self.advance();
+                node
+            }
             TokenType::Keyword(_) => todo!(),
             _ => Err(Error::new(
                 ErrorType::SyntaxError,

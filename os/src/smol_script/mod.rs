@@ -10,5 +10,7 @@ mod splitter;
 mod tokens;
 
 pub fn run(filename: String, contents: &str) {
-    println!("{:?}", parser::parse(lexer::lex(filename, contents)));
+    let tokens = lexer::lex(filename, contents);
+    let ast = parser::parse(tokens);
+    println!("{:?}", ast);
 }
