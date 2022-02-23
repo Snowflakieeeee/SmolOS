@@ -1,4 +1,4 @@
-use alloc::{borrow::ToOwned, format, vec::Vec};
+use alloc::{format, vec::Vec};
 
 use super::{
     error::{Error, ErrorType},
@@ -45,22 +45,14 @@ impl Parser {
     }
 
     fn expression(&mut self) -> ParseResult {
-        match self.current.token {
+        let token = self.current.clone();
+        match token.token {
             TokenType::Identifier(ref ident) => {
-                if let Some(f) = self.defined.iter().find(|f| f.name() == ident).cloned() {
+                if self.defined.iter().any(|f| f.name() == ident)
+                    || DEFINED_FUNCTIONS.iter().any(|f| f.name() == ident)
+                {
                     self.advance();
-                    let mut args = Vec::new();
-                    for _ in 0..f.args().len() {
-                        args.push(self.expression()?);
-                    }
-                    Ok(Node::Function(f.name().to_owned(), f.ret(), args))
-                } else if let Some(f) = DEFINED_FUNCTIONS.iter().find(|f| f.name() == ident) {
-                    self.advance();
-                    let mut args = Vec::new();
-                    for _ in 0..f.args().len() {
-                        args.push(self.expression()?);
-                    }
-                    Ok(Node::Function(f.name().to_owned(), f.ret(), args))
+                    Ok(Node::Function(token))
                 } else {
                     Err(Error::new(
                         ErrorType::UndefinedWord,
