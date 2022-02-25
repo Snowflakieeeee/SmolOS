@@ -66,13 +66,28 @@ impl Parser {
                 self.advance();
                 node
             }
-            TokenType::Keyword(_) => todo!(),
+            TokenType::Keyword(keyword) => match &*keyword {
+                // "if" => self.if_statement(),
+                // "while" => self.while_statement(),
+                // "for" => self.for_statement(),
+                // "return" => self.return_statement(),
+                "fn" => self.function_statement(),
+                _ => Err(Error::new(
+                    ErrorType::UndefinedWord,
+                    format!("'{}' is not defined", keyword),
+                    self.current.position.clone(),
+                )),
+            },
             _ => Err(Error::new(
                 ErrorType::SyntaxError,
                 format!("Unexpected token: '{}'", self.current),
                 self.current.position.clone(),
             )),
         }
+    }
+
+    fn function_statement(&mut self) -> ParseResult {
+        todo!()
     }
 }
 
